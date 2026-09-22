@@ -372,6 +372,43 @@
     .pop {
       animation: popIn 0.3s ease;
     }
+
+    /* Fly-across celebration image */
+    .fly-photo {
+      position: fixed;
+      top: 50%;
+      left: -260px;
+      width: 220px;
+      height: auto;
+      z-index: 300;
+      pointer-events: none;
+      display: none;
+    }
+
+    .fly-photo.flying {
+      display: block;
+      animation: flyAcross 2.2s cubic-bezier(0.35, 0.05, 0.65, 0.95) forwards;
+    }
+
+    @keyframes flyAcross {
+      0% {
+        transform: translate(0, -50%) rotate(-8deg) scale(0.8);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      50% {
+        transform: translate(calc(50vw - 50%), -60%) rotate(6deg) scale(1.08);
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate(calc(100vw + 260px), -50%) rotate(-4deg) scale(0.8);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -436,6 +473,8 @@
     <div class="key-row" id="row2"></div>
     <div class="key-row" id="row3"></div>
   </div>
+
+  <img class="fly-photo" id="fly-photo" src="congrats.png" alt="">
 
   <div class="overlay" id="win-overlay" onclick="closeWin()">
     <div class="win-card" onclick="event.stopPropagation()">
@@ -523,13 +562,7 @@
       });
     });
 
-    // Physical keyboard
-    document.addEventListener('keydown', e => {
-      if (solved) return;
-      if (e.key === 'Backspace') { handleKey('Backspace'); return; }
-      if (e.key === 'Enter') { checkAnswer(); return; }
-      if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
-    });
+    // Physical keyboard typing is disabled — use the on-screen keyboard only.
 
     // ── Helpers ────────────────────────────────────────────
     function getBox(i) { return document.getElementById('box-' + i); }
@@ -596,6 +629,7 @@
         document.querySelectorAll('.box').forEach((b, i) => {
           setTimeout(() => b.classList.add('pop'), i * 60);
         });
+        flyPhoto();
         setTimeout(showWin, 800);
       } else {
         // Wrong
@@ -635,6 +669,13 @@
           dot.className = 'dot used';
         }
       }
+    }
+
+    function flyPhoto() {
+      const photo = document.getElementById('fly-photo');
+      photo.classList.remove('flying');
+      void photo.offsetWidth; // reflow to restart animation
+      photo.classList.add('flying');
     }
 
     function showWin() {
